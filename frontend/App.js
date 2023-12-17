@@ -1,13 +1,13 @@
 import React from 'react';
+import {
+  View,
+} from 'react-native';
+
 import {NavigationContainer} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Login from './src/components/Login'; 
 import Register from './src/components/Register';
-
-import {
-  View,
-} from 'react-native';
 
 const Stack = createStackNavigator();
 
@@ -22,8 +22,6 @@ const App = () => {
     </NavigationContainer>
   );
 };
-
-
 
 
 
