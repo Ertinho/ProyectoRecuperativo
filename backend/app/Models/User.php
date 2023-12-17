@@ -75,5 +75,18 @@ class User extends Authenticatable
         return $this->hasMany(ProgrammingLanguage::class);
     }
 
+    /*
+     * Get the transversal skills for the user.
+     */
+    public function transversalSkills()
+    {
+        return $this->hasMany(TransversalSkill::class);
+    }
+
+    public function skills()
+    {
+        return $this->hasMany(Skill::class);
+    }
+
 
 }
