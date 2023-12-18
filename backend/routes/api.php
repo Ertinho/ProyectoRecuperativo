@@ -24,6 +24,10 @@ use App\Http\Controllers\UserController;
 // Public routes
 Route::post('login', [UserController::class, 'login']);
 
+Route::post('register', [UserController::class, 'register']);
+
+
+
 // Protected routes
 Route::group(['middleware' => ['jwt.auth']], function() {
     //Route::get('user-profile', 'App\Http\Controllers\UserController@getProfile');
