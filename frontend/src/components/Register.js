@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert } from 'react-native';
 
+import {URL} from './src/helpers/index';
+const endpoint = URL;
+
+
+
 const Register = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
