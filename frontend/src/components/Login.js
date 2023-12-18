@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert } from 'react-native';
 
+import axios from 'axios';
 import {URL} from './src/helpers/index';
 const endpoint = URL;
 
