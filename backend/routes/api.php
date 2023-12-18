@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +24,6 @@ use App\Http\Controllers\UserController;
 
 // Public routes
 Route::post('login', [UserController::class, 'login']);
-
 Route::post('register', [UserController::class, 'register']);
 
 
@@ -35,6 +35,7 @@ Route::group(['middleware' => ['jwt.auth']], function() {
 
     Route::get('profile', [UserController::class, 'me']);
     Route::post('refresh', [UserController::class, 'refresh']);
+    Route::post('posts', [PostController::class, 'store']);
 
 });
 
