@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Alert, Text, StyleSheet} from 'react-native';
+
+import AuthContext from '../context/AuthContext';
 
 import axios from 'axios';
 import {URL} from '../helpers/index';
@@ -10,6 +12,9 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+
+  const { login } = useContext(AuthContext);
+
   const handleLogin = async () => {
    
     const response = await axios.post(`${endpoint}login`, {
@@ -19,6 +24,7 @@ const Login = ({ navigation }) => {
     .then(res => {
       if (res.status === 200) {
         // If login is successful, navigate to the Home screen
+        login();
         navigation.navigate('Home');
       } else {
         // If login is unsuccessful, alert the error message

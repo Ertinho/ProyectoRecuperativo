@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert , ScrollView, Text, StyleSheet} from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import axios from 'axios';
 import {URL} from '../helpers/index';
 const endpoint = URL;
 
-
-
 const Register = ({ navigation }) => {
-
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
@@ -82,6 +80,26 @@ const Register = ({ navigation }) => {
 
   };
 
+
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setBirthdate(date.toLocaleDateString());
+    hideDatePicker();
+  };
+
+
+
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.label}>Nombre</Text>
@@ -106,11 +124,18 @@ const Register = ({ navigation }) => {
         placeholder={'Ingrese su nombre de usuario'}
       />
       <Text style={styles.label}>Cumpleaños</Text>
+      <Button title="Selecciona tu fecha de nacimiento" onPress={showDatePicker} />
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
       <TextInput
         style={styles.input}  
-        placeholder="Ingrese su cumpleaños"
-        onChangeText={(text) => setBirthdate(text)}
+        placeholder=""
         value={birthdate}
+        editable={false} // The user cannot edit this field manually
       />
       <Text style={styles.label}>Correo electrónico</Text>
       <TextInput
