@@ -54,43 +54,50 @@ class UserController extends Controller
 
         ]);
 
-
-        $user = User::create([
-            'name' => $request->name,
-            'lastName' => $request->lastName,
-            'userName' => $request->userName,
-            'birthDate' => $request->birthDate,
-            'role' =>1,
-            'status' => 'active',
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
-
-        // Create the skills and associate them with the user
-        foreach ($request->skills as $skill) {
-            $newSkill = Skill::create([
-                'name' => $skill['name'],
-                'user_id' => $user->id,
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'lastName' => $request->lastName,
+                'userName' => $request->userName,
+                'birthDate' => $request->birthDate,
+                'role' =>1,
+                'status' => 'active',
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
             ]);
-            $user->skills()->save($newSkill);
-        }
 
-        // Create the programming languages and associate them with the user
-        foreach ($request->programmingLanguages as $programmingLanguage) {
-            $newProgrammingLanguage = ProgrammingLanguage::create([
-                'name' => $programmingLanguage['name'],
-                'user_id' => $user->id,
-            ]);
-            $user->programmingLanguages()->save($newProgrammingLanguage);
-        }
+            // Create the skills and associate them with the user
+            foreach ($request->skills as $skill) {
+                $newSkill = Skill::create([
+                    'name' => $skill['name'],
+                    'user_id' => $user->id,
+                ]);
+                $user->skills()->save($newSkill);
+            }
 
-        // Create the transversal skills and associate them with the user
-        foreach ($request->transversalSkills as $transversalSkill) {
-            $newTransversalSkill = TransversalSkill::create([
-                'name' => $transversalSkill['name'],
-                'user_id' => $user->id,
-            ]);
-            $user->transversalSkills()->save($newTransversalSkill);
+            // Create the programming languages and associate them with the user
+            foreach ($request->programmingLanguages as $programmingLanguage) {
+                $newProgrammingLanguage = ProgrammingLanguage::create([
+                    'name' => $programmingLanguage['name'],
+                    'user_id' => $user->id,
+                ]);
+                $user->programmingLanguages()->save($newProgrammingLanguage);
+            }
+
+            // Create the transversal skills and associate them with the user
+            foreach ($request->transversalSkills as $transversalSkill) {
+                $newTransversalSkill = TransversalSkill::create([
+                    'name' => $transversalSkill['name'],
+                    'user_id' => $user->id,
+                ]);
+                $user->transversalSkills()->save($newTransversalSkill);
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al registrar el usuario',
+                'error' => $th->getMessage(),
+            ], 500);
         }
 
         // Generate a token for the registered user
