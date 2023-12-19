@@ -26,7 +26,7 @@ const Register = ({ navigation }) => {
   };
   
   const [selectedTransversalSkills, setSelectedTransversalSkills] = useState([]);
-  const transversalSkills = ['Communication', 'Teamwork', 'Problem solving', 'Time management', 'Adaptability'];
+  const transversalSkills = ['Proactividad', 'Creatividad', 'Tolerancia a cambios', 'Comunicación', 'Trabajo en equipo', 'Resolución de problemas', 'Gestión del tiempo', 'Adaptabilidad'];
   const handleTransversalSkillSelect = (value) => {
     if (selectedTransversalSkills.includes(value)) {
       setSelectedTransversalSkills(selectedTransversalSkills.filter(transversalSkill => transversalSkill !== value));
@@ -36,7 +36,7 @@ const Register = ({ navigation }) => {
   };
   
   const [selectedGeneralSkills, setSelectedGeneralSkills] = useState([]);
-  const generalSkills = ['Skill 1', 'Skill 2', 'Skill 3', 'Skill 4', 'Skill 5'];
+  const generalSkills = ['Desarrollo de aplicaciones móviles', 'Desarrollador Front-End', 'Desarrollador Back-End', 'Diseñador UI/UX', 'Desarrollador de videojuegos', 'Desarrollador de sistemas integrados', 'Diseñador web', 'Analizador de sistemas', 'Arquitecto de software' , 'Ingeniero de Aseguramiento de Calidad (QA)'];
   const handleGeneralSkillSelect = (value) => {
     if (selectedGeneralSkills.includes(value)) {
       setSelectedGeneralSkills(selectedGeneralSkills.filter(skill => skill !== value));
@@ -164,7 +164,9 @@ const Register = ({ navigation }) => {
             unfillColor="#FFFFFF"
             iconStyle={{ borderColor: "red" }}
             onPress={() => handleLanguageSelect(language)}
-            
+            textStyle={{
+              textDecorationLine: "none",
+            }}
           />
         ))}
       </View>
@@ -179,11 +181,14 @@ const Register = ({ navigation }) => {
             unfillColor="#FFFFFF"
             iconStyle={{ borderColor: "red" }}
             onPress={() => handleTransversalSkillSelect(transversalSkills)}
+            textStyle={{
+              textDecorationLine: "none",
+            }}
           />
         ))}
       </View>
 
-      <Text style={styles.label}>Habilidades generales</Text>
+      <Text style={styles.label}>Habilidades</Text>
       <View>
         {generalSkills.map((skill, index) => (
           <BouncyCheckbox
@@ -193,6 +198,9 @@ const Register = ({ navigation }) => {
             unfillColor="#FFFFFF"
             iconStyle={{ borderColor: "red" }}
             onPress={() => handleGeneralSkillSelect(skill)}
+            textStyle={{
+              textDecorationLine: "none",
+            }}
           />
         ))}
       </View>
