@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Alert, Text, StyleSheet} from 'react-native';
 
-import AuthContext from '../context/AuthContext';
+import * as Keychain from 'react-native-keychain';
+
 
 import axios from 'axios';
 import {URL} from '../helpers/index';
@@ -12,26 +13,27 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-
-  const { login } = useContext(AuthContext);
-
   const handleLogin = async () => {
-   
-    const response = await axios.post(`${endpoint}login`, {
-      email: email,
-      password: password,
-    })
-    .then(res => {
-      if (res.status === 200) {
+    try {
+      const response = await axios.post(`${endpoint}login`, {
+        email: email,
+        password: password,
+      });
+  
+      if (response.status === 200) {
+        const { access_token, expires_in } = response.data;
+        const expirationTime = (Date.now() / 1000 + expires_in).toString();
+  
+        // Store the token and expiration time in the keychain
+        await Keychain.setGenericPassword(access_token, expirationTime);
+  
         // If login is successful, navigate to the Home screen
-        login();
         navigation.navigate('Home');
       } else {
         // If login is unsuccessful, alert the error message
-        Alert.alert(res.data.message);
+        Alert.alert(response.data.message);
       }
-    })
-    .catch(error => {
+    } catch (error) {
       // Handle the error here
       let errorMessage = 'Hubo un error al iniciar sesión';
       
@@ -39,9 +41,9 @@ const Login = ({ navigation }) => {
       if (error.response && error.response.data && error.response.data.message) {
         errorMessage = error.response.data.message;
       }
-
+  
       Alert.alert(errorMessage);
-    });
+    }
   };
 
   return (

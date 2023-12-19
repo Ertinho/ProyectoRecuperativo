@@ -1,13 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import AuthContext from '../context/AuthContext';
 
 const Home = () => {
     const { isAuthenticated } = useContext(AuthContext); // Access the isAuthenticated value
-    // If the user is not authenticated, return null or redirect to the login screen
-    if (!isAuthenticated) {
-        return null; // Or navigation.navigate('Login');
-    }
+    
+    useEffect(() => {
+        // If the user is not authenticated, navigate to the Login screen
+        if (!isAuthenticated) {
+          navigation.navigate('Iniciar Sesión');
+        }
+    }, [isAuthenticated, navigation]);
+
+    
+
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Welcome to the Home Screen!</Text>

@@ -15,11 +15,11 @@ class UserController extends Controller
 
     public function register(Request $request){
         $request->validate([
-            'name' => ['required', 'min:5'],
+            'name' => ['required', 'min:2'],
             'email' =>['required', 'email', 'unique:users'],
             'password' => ['required', 'min:8', 'max:15', 'alpha_num'],
-            'userName' => ['required', 'min:4'],
-            'lastName' => ['required', 'min:5'],
+            'userName' => ['required', 'min:2', 'unique:users', 'max:15', 'alpha_num'],
+            'lastName' => ['required', 'min:2'],
             'birthDate' => ['required', 'date'],
             'skills' => ['required', 'array', 'min:3'],
             'skills.*.name' => ['required'],
@@ -31,7 +31,7 @@ class UserController extends Controller
             'transversalSkills.*.name' => ['required'],
         ], [
             'name.required' => 'El nombre es requerido',
-            'name.min' => 'El nombre debe tener al menos 5 carácteres',
+            'name.min' => 'El nombre debe tener al menos 2 carácteres',
             'email.required' => 'El correo electrónico es requerido',
             'email.email' => 'El correo electrónico debe ser válido',
             'email.unique' => 'El correo electrónico ya está en uso',
@@ -40,9 +40,12 @@ class UserController extends Controller
             'password.max' => 'La contraseña no puede tener más de 15 carácteres',
             'password.alpha_num' => 'La contraseña solo puede contener letras y números',
             'userName.required' => 'El nombre de usuario es requerido',
-            'userName.min' => 'El nombre de usuario debe tener al menos 4 carácteres',
+            'userName.min' => 'El nombre de usuario debe tener al menos 2 carácteres',
+            'userName.max' => 'El nombre de usuario no puede tener más de 15 carácteres',
+            'userName.unique' => 'El nombre de usuario ya está en uso',
+            'userName.alpha_num' => 'El nombre de usuario solo puede contener letras, solo números, o una combinación de ambos',
             'lastName.required' => 'El apellido es requerido',
-            'lastName.min' => 'El apellido debe tener al menos 5 carácteres',
+            'lastName.min' => 'El apellido debe tener al menos 2 carácteres',
             'birthDate.required' => 'La fecha de nacimiento es requerida',
             'birthDate.date' => 'La fecha de nacimiento debe ser válida',
             'skills.min' => 'Debe tener al menos 3 habilidades',
@@ -161,7 +164,18 @@ class UserController extends Controller
 
     public function refresh()
     {
-        return $this->respondWithToken(JWTAuth::refresh());
+        try {
+            return $this->respondWithToken(JWTAuth::refresh());
+        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            // Handle invalid token
+            return response()->json(['error' => 'Token is invalid'], 400);
+        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            // Handle expired token
+            return response()->json(['error' => 'Token is expired'], 400);
+        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+            // Handle error while trying to encode the token
+            return response()->json(['error' => 'Error while encoding the token'], 500);
+        }
     }
 
     public function me()
