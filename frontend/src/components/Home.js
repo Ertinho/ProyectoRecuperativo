@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import AuthContext from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
-const Home = () => {
+const Home = ({ navigation }) => {
     const { isAuthenticated } = useContext(AuthContext); // Access the isAuthenticated value
     
     useEffect(() => {

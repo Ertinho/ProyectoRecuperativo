@@ -1,30 +1,46 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text } from 'react-native';
-import AuthContext from '../context/AuthContext'; 
+import { View, Text, Alert, Button } from 'react-native';
+
+import { AuthContext } from '../context/AuthContext'; 
 import { isTokenExpiring } from '../authUtils'; // Import the isTokenExpiring function
 import { refreshTokenFunc } from '../authUtils';
 
 
 const Profile = ({ navigation }) => {
-  const { token, refreshToken, setToken } = useContext(AuthContext); // Access the token and setToken function from the AuthContext
+    const { isAuthenticated, logout  } = useContext(AuthContext); // Access the isAuthenticated value
+    
+
+    useEffect(() => {
+        // If the user is not authenticated, navigate to the Login screen
+        if (!isAuthenticated) {
+          logout();
+          navigation.navigate('Iniciar Sesión');
+        }
+    }, [isAuthenticated, navigation]);
 
   useEffect(() => {
-    if (isTokenExpiring(token)) {
+    if (isTokenExpiring()) {
       Alert.alert(
-        'Session Expiring',
-        'Your session is about to expire. Do you want to extend it?',
+        'Sesión vencida',
+        'Su sesión está a punto de caducar. ¿Quieres ampliarlo?',
         [
-          { text: 'No', onPress: () => setToken(null) }, // If the user says No, clear the token
-          { text: 'Yes', onPress: () => refreshTokenFunc(refreshToken, setToken) }, // If the user says Yes, refresh the token
+          { text: 'No', onPress: () => logout() }, // If the user says No, log them out
+          { text: 'Sí', onPress: () => refreshTokenFunc() }, // If the user says Yes, refresh the token
         ],
       );
     }
-  }, [token, refreshToken, setToken]);
+  }, []);
 
 
   return (
     <View>
-      <Text>Welcome to the Profile Screen!</Text>
+        <Text>Welcome to the Profile Screen!</Text>
+
+        <Button
+        title="Cerrar sesión"
+        onPress={logout}
+        />
+
     </View>
   );
 };

@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Alert , ScrollView, Text, StyleSheet} from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, TextInput, Button, Modal, Alert , ScrollView, Text, StyleSheet} from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
+import * as Keychain from 'react-native-keychain';
+import { AuthContext } from '../context/AuthContext';
+
 
 import axios from 'axios';
 import {URL} from '../helpers/index';
 const endpoint = URL;
 
 const Register = ({ navigation }) => {
+  const { login } = useContext(AuthContext);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errors, setErrors] = useState([]);
+
+
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
@@ -47,37 +57,56 @@ const Register = ({ navigation }) => {
   
 
   const handleRegister = async () => {
-    
-    const response = await axios.post(`${endpoint}register`, {
-      userName: username,
-      password: password,
-      name: name,
-      lastName: lastName,
-      birthDate: birthdate,
-      email: email,
 
-      programmingLanguages: selectedLanguages,
-      transversalSkills: selectedTransversalSkills,
-      skills: selectedGeneralSkills,
-    })
-    .then(res => {
-      // Handle the response here
-      Alert.alert('Registro exitoso');
-    })
-    .catch(error => {
-      // Handle the error here
-      let errorMessage = 'Registro fallido';
-      
-      
+    try {
+      const response = await axios.post(`${endpoint}register`, {
+        userName: username,
+        password: password,
+        name: name,
+        lastName: lastName,
+        birthDate: birthdate,
+        email: email,
+  
+        programmingLanguages: selectedLanguages,
+        transversalSkills: selectedTransversalSkills,
+        skills: selectedGeneralSkills,
+      });
+
+      if (response.status === 200)
+      {
+        const { access_token, expires_in } = response.data;
+        const expirationTime = (Date.now() / 1000 + expires_in).toString();
+    
+        // Store the token and expiration time in the keychain
+        await Keychain.setGenericPassword(access_token, expirationTime);
+
+        // If register is successful, navigate to the Home screen
+        login();
+        Alert.alert('Registro exitoso');
+        navigation.navigate('Home');
+      }
+    } catch (error) {
+      let errorMessages = [];
       // If the error response has data and errors, use it
       if (error.response && error.response.data && error.response.data.errors) {
-        errorMessage = Object.values(error.response.data.errors).join('\n');
+        errorMessages = Object.values(error.response.data.errors);
       }
       
-      Alert.alert(errorMessage);
-    });
+      // If the error has a status code of 500, it means there's a server error
+      // If there's a server error, show a different alert
+      if (error.response && error.response.status === 500) {
+        // The error response from the backend includes a message and error
+        let errorMessage1 = error.response.data.message;
+        let errorMessage2 = error.response.data.error;
+        // If the error response has a message and error, use it
+        if (error.response.data.message && error.response.data.error) {
+          errorMessages = [errorMessage1, errorMessage2];
+        }
+      }
 
-
+      setErrors(errorMessages);
+      setModalVisible(true);
+    }
   };
 
 
@@ -92,8 +121,21 @@ const Register = ({ navigation }) => {
     setDatePickerVisibility(false);
   };
 
+  const formatDate = (date) => {
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = date.getFullYear();
+  
+    if (month.length < 2) 
+      month = '0' + month;
+    if (day.length < 2) 
+      day = '0' + day;
+  
+    return [year, month, day].join('-');
+  };
+
   const handleConfirm = (date) => {
-    setBirthdate(date.toLocaleDateString());
+    setBirthdate(formatDate(date));
     hideDatePicker();
   };
 
@@ -118,12 +160,13 @@ const Register = ({ navigation }) => {
       />
       <Text style={styles.label}>Nombre de usuario</Text>
       <TextInput
+        autoCapitalize="none"
         style={styles.input}
         value={username}
         onChangeText={(text) => setUsername(text)}
         placeholder={'Ingrese su nombre de usuario'}
       />
-      <Text style={styles.label}>Cumpleaños</Text>
+      <Text style={styles.label}>Fecha de nacimiento</Text>
       <Button title="Selecciona tu fecha de nacimiento" onPress={showDatePicker} />
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
@@ -136,16 +179,20 @@ const Register = ({ navigation }) => {
         placeholder=""
         value={birthdate}
         editable={false} // The user cannot edit this field manually
+        placeholderTextColor = {'black'}
       />
       <Text style={styles.label}>Correo electrónico</Text>
       <TextInput
+        autoCapitalize="none"
         style={styles.input}
         placeholder="Ingrese su correo electrónico"
         onChangeText={(text) => setEmail(text)}
         value={email}
+        inputMode={'email'}
       />
       <Text style={styles.label}>Contraseña</Text>
       <TextInput
+        autoCapitalize="none"
         style={styles.input}
         value={password}
         onChangeText={(text) => setPassword(text)}
@@ -211,6 +258,30 @@ const Register = ({ navigation }) => {
         
       />
       
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View >
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Tienes los siguientes mensajes:</Text>
+            <ScrollView>
+              {errors.map((error, index) => (
+                <Text key={index}>{error}</Text>
+              ))}
+            </ScrollView>
+            <Button
+              title="Cerrar"
+              onPress={() => setModalVisible(!modalVisible)}
+            />
+          </View>
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 };
@@ -245,6 +316,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2', // light gray
   },
   
+
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 15,
+    textAlign: "center"
+  },
+
+
 });
 
 export default Register;
