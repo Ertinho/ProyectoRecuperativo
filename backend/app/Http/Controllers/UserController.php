@@ -38,7 +38,7 @@ class UserController extends Controller
             'userName.min' => 'El nombre de usuario debe tener al menos 2 carácteres.',
             'userName.max' => 'El nombre de usuario no puede tener más de 15 carácteres.',
             'userName.unique' => 'El nombre de usuario ya está en uso.',
-            'userName.alpha_num' => 'El nombre de usuario solo puede contener letras, solo números, o una combinación de ambos.',
+            'userName.alpha_num' => 'El nombre de usuario solo puede contener letras, solo números, o una combinación de ambos. Los espacios y otros carácteres no están permitidos.',
             'lastName.required' => 'El apellido es requerido.',
             'lastName.min' => 'El apellido debe tener al menos 2 carácteres.',
             'birthDate.required' => 'La fecha de nacimiento es requerida.',
@@ -137,7 +137,6 @@ class UserController extends Controller
             }
             return $this->respondWithToken($token);
         } catch (\Throwable $th) {
-            //throw $th;
             return response()->json([
                 'message' => 'Error al iniciar sesión.',
                 'error' => $th->getMessage(),
