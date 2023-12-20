@@ -97,7 +97,7 @@ class User extends Authenticatable implements JWTSubject
     /*
      * Get the programming languages for the user.
      */
-    public function programmingLanguages()
+    public function programming_languages()
     {
         return $this->hasMany(ProgrammingLanguage::class);
     }
@@ -105,7 +105,7 @@ class User extends Authenticatable implements JWTSubject
     /*
      * Get the transversal skills for the user.
      */
-    public function transversalSkills()
+    public function transversal_skills()
     {
         return $this->hasMany(TransversalSkill::class);
     }

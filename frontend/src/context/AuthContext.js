@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 
+import { isTokenExpiring, refreshTokenFunc } from '../authUtils'; // Import the necessary functions
+
 import * as Keychain from 'react-native-keychain';
 
 
@@ -17,6 +19,13 @@ export const AuthProvider = ({ children }) => {
     const login = async () => {
         // After logging in, set the authentication state to true
         setIsAuthenticated(true);
+
+        // Check if the token is expiring
+        const isExpiring = await isTokenExpiring();
+        if (isExpiring) {
+          // If the token is expiring, refresh it
+          await refreshTokenFunc();
+        }
     };
 
 
@@ -26,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const credentials = await Keychain.getGenericPassword();
           if (credentials) {
-            login();
+            await login();
           }
         } catch (error) {
         // Handle error
@@ -35,7 +44,20 @@ export const AuthProvider = ({ children }) => {
       };
   
       loadTokens();
-    }, []);
+
+      // Set up an interval to check the token expiration every 5 minutes
+      const intervalId = setInterval(async () => {
+        if (isAuthenticated) {
+          const isExpiring = await isTokenExpiring();
+          if (isExpiring) {
+            await refreshTokenFunc();
+          }
+        }
+      }, 300000); // 300000 milliseconds = 5 minutes
+
+      // Clear the interval when the component unmounts
+      return () => clearInterval(intervalId);
+    }, [isAuthenticated]); // Add isAuthenticated as a dependency
   
     return (
       <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, login, logout }}>

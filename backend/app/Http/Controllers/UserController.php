@@ -189,7 +189,16 @@ class UserController extends Controller
 
     public function me()
     {
-        return response()->json(JWTAuth::user());
+        try {
+            $user = JWTAuth::user();
+            // Load the relationships
+            $user->load('skills', 'programming_languages', 'transversal_skills', 'posts');
+
+            return response()->json($user);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json(['error' => 'No se pudieron recuperar los datos del usuario. ' . $e->getMessage()], 500);
+        }
     }
 
 }

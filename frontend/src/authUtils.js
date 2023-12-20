@@ -2,7 +2,7 @@
 import * as Keychain from 'react-native-keychain';
 
 import axios from 'axios';
-import {URL} from '../helpers/index';
+import {URL} from './helpers/index';
 const endpoint = URL;
 
 export async function isTokenExpiring() {
@@ -11,16 +11,18 @@ export async function isTokenExpiring() {
       return false;
     }
   
-    const tokenExpiration = credentials.password;
-
+    const tokenExpiration = Number(credentials.password); // Convert to number
 
     // Get the current time
-    // Divide by 1000 because JS works in milliseconds instead of seconds
     const currentTime = Date.now() / 1000;
   
-    // If the token is expiring in the next 2 hours, return true
+    // If the token is expiring in the next 10 minutes, return true
     // Otherwise, return false.
-    return (tokenExpiration - currentTime < 60 * 1);
+    if (tokenExpiration - currentTime <= 600) {
+      return true;
+    } else {
+      return false;
+    }
 }
 
 
