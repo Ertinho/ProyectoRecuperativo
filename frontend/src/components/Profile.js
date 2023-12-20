@@ -7,17 +7,8 @@ import { refreshTokenFunc } from '../authUtils';
 
 
 const Profile = ({ navigation }) => {
-    const { isAuthenticated, logout  } = useContext(AuthContext); // Access the isAuthenticated value
+  const { isAuthenticated, logout  } = useContext(AuthContext); // Access the isAuthenticated value
     
-
-    useEffect(() => {
-        // If the user is not authenticated, navigate to the Login screen
-        if (!isAuthenticated) {
-          logout();
-          navigation.navigate('Iniciar Sesión');
-        }
-    }, [isAuthenticated, navigation]);
-
   useEffect(() => {
     if (isTokenExpiring()) {
       Alert.alert(

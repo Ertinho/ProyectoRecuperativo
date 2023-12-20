@@ -34,7 +34,7 @@ const Login = ({ navigation }) => {
   
         // If login is successful, navigate to the Home screen
         login();
-        navigation.navigate('Home');
+        navigation.navigate('Main');
       } 
 
     } catch (error) {
