@@ -9,8 +9,7 @@ import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 
 import Login from './src/components/Login'; 
 import Register from './src/components/Register';
-
-
+import EditProfile from './src/components/EditProfile';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +26,7 @@ const App = () => {
           <Stack.Screen name="Iniciar Sesión" component={Login} />
           <Stack.Screen name="Registrarse" component={Register} />
           <Stack.Screen name="Main" component={BottomTabNavigator} /> 
+          <Stack.Screen name="EditProfile" component={EditProfile} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

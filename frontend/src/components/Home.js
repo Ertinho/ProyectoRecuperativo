@@ -33,6 +33,17 @@ const Home = ({ navigation }) => {
 
     
 
+
+
+
+
+
+
+
+
+
+    
+
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Welcome to the Home Screen!</Text>

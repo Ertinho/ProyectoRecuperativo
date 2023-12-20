@@ -201,4 +201,99 @@ class UserController extends Controller
         }
     }
 
+
+    public function updateProfile(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'name' => ['required', 'min:2'],
+            'lastName' => ['required', 'min:2'],
+            'birthDate' => ['required', 'date'],
+
+            'skills' => [ 'array', 'min:3'],
+            'programmingLanguages' => ['array', 'min:1'],
+            'transversalSkills' => [ 'array', 'min:2'],
+        ], [
+            'name.required' => 'El nombre es requerido.',
+            'name.min' => 'El nombre debe tener al menos 2 carácteres.',
+            'lastName.required' => 'El apellido es requerido.',
+            'lastName.min' => 'El apellido debe tener al menos 2 carácteres.',
+            'birthDate.required' => 'La fecha de nacimiento es requerida.',
+            'birthDate.date' => 'La fecha de nacimiento debe ser válida.',
+            'skills.min' => 'Debe tener al menos 3 habilidades.',
+            'programmingLanguages.min' => 'Debe tener al menos 1 lenguaje de programación.',
+            'transversalSkills.min' => 'Debe tener al menos 2 habilidades transversales.',
+        ]);
+
+        try {
+            $user = JWTAuth::user();
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'No se pudo recuperar el usuario. ' . $th->getMessage()], 500);
+        }
+
+        try {
+            // Update the user's basic information
+            $user->update($request->only('name', 'lastName', 'birthDate'));
+
+
+            // Get the current skills
+            $currentSkills = $user->skills()->pluck('name')->toArray();
+
+            // Find the skills to add and the skills to remove
+            $skillsToAdd = array_diff($request->skills, $currentSkills);
+            $skillsToRemove = array_diff($currentSkills, $request->skills);
+
+            // Add the new skills
+            foreach ($skillsToAdd as $skillName) {
+                $user->skills()->create(['name' => $skillName , 'user_id' => $user->id]);
+            }
+
+            // Remove the skills that are no longer present
+            foreach ($skillsToRemove as $skillName) {
+                $user->skills()->where('name', $skillName)->delete();
+            }
+
+            //
+            // Get the current programming languages
+            $currentLanguages = $user->programming_languages()->pluck('name')->toArray();
+
+            // Find the languages to add and the languages to remove
+            $languagesToAdd = array_diff($request->programming_languages, $currentLanguages);
+            $languagesToRemove = array_diff($currentLanguages, $request->programming_languages);
+
+            // Add the new languages
+            foreach ($languagesToAdd as $languageName) {
+                $user->programming_languages()->create(['name' => $languageName , 'user_id' => $user->id]);
+            }
+
+            // Remove the languages that are no longer present
+            foreach ($languagesToRemove as $languageName) {
+                $user->programming_languages()->where('name', $languageName)->delete();
+            }
+
+            // Get the current transversal skills
+            $currentTransversalSkills = $user->transversal_skills()->pluck('name')->toArray();
+
+            // Find the transversal skills to add and the transversal skills to remove
+            $transversalSkillsToAdd = array_diff($request->transversal_skills, $currentTransversalSkills);
+            $transversalSkillsToRemove = array_diff($currentTransversalSkills, $request->transversal_skills);
+
+            // Add the new transversal skills
+            foreach ($transversalSkillsToAdd as $transversalSkillName) {
+                $user->transversal_skills()->create(['name' => $transversalSkillName , 'user_id' => $user->id]);
+            }
+
+            // Remove the transversal skills that are no longer present
+            foreach ($transversalSkillsToRemove as $transversalSkillName) {
+                $user->transversal_skills()->where('name', $transversalSkillName)->delete();
+            }
+
+            // return a message
+            return response()->json(['message' => 'Datos actualizados correctamente.'], 200);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json(['error' => 'No se pudieron actualizar los datos del usuario. ' . $e->getMessage()], 500);
+        }
+    }
+
 }

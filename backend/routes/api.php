@@ -39,6 +39,9 @@ Route::group(['middleware' => ['jwt.auth']], function() {
     Route::post('createPost', [PostController::class, 'store']);
     Route::post('upload', [ImageController::class, 'uploadImage']);
     Route::get('posts', [PostController::class, 'index']);
+
+    //update
+    Route::put('profile', [UserController::class, 'updateProfile']);
 });
 
 
