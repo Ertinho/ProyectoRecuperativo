@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet} from 'react-native';
+import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import * as Keychain from 'react-native-keychain';
 import { AuthContext } from '../context/AuthContext';
@@ -12,6 +13,7 @@ const endpoint = URL;
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [hidePassword, setHidePassword] = useState(true);
 
   const { login } = useContext(AuthContext);
 
@@ -84,16 +86,30 @@ const Login = ({ navigation }) => {
         value={password}
         onChangeText={(text) => setPassword(text)}
         placeholder={'Ingrese su contraseña'}
-        secureTextEntry={true}
+        secureTextEntry={hidePassword}
       />
-      <Button
-        title={'Iniciar Sesión'}
-        onPress={handleLogin}
-      />
-      <Button
-        title={'Registrarse'}
-        onPress={() => navigation.navigate('Registrarse')}
-      />
+      <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}
+        style={styles.iconRow}
+      >
+        <Icon name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+        <Text style={styles.iconText}>{hidePassword ? 'Mostrar contraseña' : 'Ocultar la contraseña'}</Text>
+      </TouchableOpacity>
+
+
+      <View style={styles.button}>
+        <Button
+          title={'Iniciar Sesión'}
+          onPress={handleLogin}
+        />
+      </View>
+      <View style={styles.button}>
+        <Button
+          title={'Registrarse'}
+          onPress={() => navigation.navigate('Registrarse')}
+        />
+      </View>
+      
+      
     </View>
   );
 };
@@ -107,30 +123,44 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#333',
-    //marginBottom: 10,
-    //marginTop: 10,
     textAlign: 'center',
     backgroundColor: 'lightgreen',
 
     borderColor: 'gray', 
     borderWidth: 1, 
-    borderRadius: 5, 
-    padding: 5, 
+    
+    padding: 10, 
   },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 5,
-    //marginBottom: 10,
+    
     paddingLeft: 10,
     backgroundColor: '#f2f2f2', // light gray
   },
   
+
+  button:{
+    marginVertical: 10,
+  },
+
+  iconText:{
+    'fontSize': 15,
+    'fontWeight': 'bold',
+    'marginHorizontal': 10,
+    'marginVertical': 10,    
+  },
+
+  iconRow:{
+    'flexDirection': 'row',
+    'justifyContent': 'center',
+    'alignItems': 'center',
+    'marginTop': 10,
+  },
+
+
 });
-
-
-
 
 
 

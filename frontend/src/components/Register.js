@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, Button, Modal, Alert , ScrollView, Text, StyleSheet} from 'react-native';
+import { View, TextInput, Button, Modal, Alert , ScrollView, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import * as Keychain from 'react-native-keychain';
 import { AuthContext } from '../context/AuthContext';
@@ -24,7 +25,8 @@ const Register = ({ navigation }) => {
   const [birthdate, setBirthdate] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+  const [hidePassword, setHidePassword] = useState(true);
+
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const languages = ['JavaScript', 'Python', 'Java', 'C++', 'Ruby'];
   const handleLanguageSelect = (value) => {
@@ -176,10 +178,10 @@ const Register = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}  
-        placeholder=""
+        placeholder="Selecciona tu fecha de nacimiento con el botón"
         value={birthdate}
         editable={false} // The user cannot edit this field manually
-        placeholderTextColor = {'black'}
+        
       />
       <Text style={styles.label}>Correo electrónico</Text>
       <TextInput
@@ -197,8 +199,14 @@ const Register = ({ navigation }) => {
         value={password}
         onChangeText={(text) => setPassword(text)}
         placeholder={'Ingrese su contraseña'}
-        secureTextEntry={true}
+        secureTextEntry={hidePassword}
       />
+      <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}
+        style={styles.iconRow}
+      >
+        <Icon name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+        <Text style={styles.iconText}>{hidePassword ? 'Mostrar contraseña' : 'Ocultar la contraseña'}</Text>
+      </TouchableOpacity>
       
 
       <Text style={styles.label}>Lenguajes de programación</Text>
@@ -252,11 +260,15 @@ const Register = ({ navigation }) => {
         ))}
       </View>
 
-      <Button
-        title={'Registrar'}
-        onPress={handleRegister}
-        
-      />
+
+      <View style={styles.button}>
+        <Button
+          title={'Registrar'}
+          onPress={handleRegister}
+        /> 
+      </View>
+
+      
       
       <Modal
         animationType="slide"
@@ -296,22 +308,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#333',
-    //marginBottom: 10,
-    //marginTop: 10,
     textAlign: 'center',
     backgroundColor: 'lightgreen',
 
     borderColor: 'gray', 
     borderWidth: 1, 
-    borderRadius: 5, 
-    padding: 5, 
+    
+    padding: 10, 
   },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 5,
-    //marginBottom: 10,
+    
     paddingLeft: 10,
     backgroundColor: '#f2f2f2', // light gray
   },
@@ -339,6 +348,23 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
 
+
+  button:{
+    marginTop: 20,
+  },
+
+  iconText:{
+    'fontSize': 15,
+    'fontWeight': 'bold',
+    'marginHorizontal': 10,
+    'marginVertical': 10,    
+  },
+
+  iconRow:{
+    'flexDirection': 'row',
+    'justifyContent': 'center',
+    'alignItems': 'center',
+  },
 
 });
 
