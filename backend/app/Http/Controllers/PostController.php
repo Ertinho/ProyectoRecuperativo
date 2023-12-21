@@ -73,6 +73,43 @@ class PostController extends Controller
 
 
 
+    /**
+     * Update the specified resource in storage.
+     */
+    public function updateLikes(UpdatePostRequest $request, int $id)
+    {
+        //
+
+        try{
+            DB::beginTransaction();
+            $post = Post::find($id);
+             if(!$post){
+                return response()->json([
+                'message' => 'No se encontró el post',
+                ], 404);
+                 }
+            $updateLikes = $post->likesCount + 1;
+            $post->update([
+                'likesCount' => $updateLikes,
+            ]);
+            DB::commit();
+            return response()->json([
+                'message' => 'Se actualizó el post',
+                'post' => $post,
+            ], 200);
+        }
+        catch (JWTException $e) {
+            // Retornamos la respuesta
+            return response()->json([
+                'message' => 'Oops ha ocurido un error...',
+            ], 500);
+        }
+
+    }
+
+
+
+
 
 
 

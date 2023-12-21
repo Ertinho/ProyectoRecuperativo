@@ -4,6 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Home from '../components/Home';
 import Profile from '../components/Profile';
+import NewPost from '../components/NewPost';
 
 
 const Tab = createBottomTabNavigator();
@@ -21,6 +22,8 @@ export default function BottomTabNavigator() {
               iconName = focused ? 'home' : 'home-outline';
             } else if (route.name === 'Perfil') {
               iconName = focused ? 'person' : 'person-outline';
+            } else if (route.name === 'NewPost') {
+              iconName = focused ? 'create' : 'create-outline';
             }
 
             // You can return any component that you like here!
@@ -31,6 +34,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Perfil" component={Profile} />
+      <Tab.Screen name="NewPost" component={NewPost} options={{ title: 'Nueva Publicación' }} />
     </Tab.Navigator>
   );
 }
