@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Button, Image, TextInput, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Button, Image, TextInput, View, StyleSheet , Text,} from 'react-native';
 
 import * as ImagePicker from 'react-native-image-picker';
 
@@ -20,9 +20,13 @@ const NewPost = ({ navigation }) => {
         } else if (response.error) {
             console.log('ImagePicker Error: ', response.error);
         } else {
-            const source = { uri: response.uri };
-            setImage(source);
+            const source = { uri: response.assets[0].uri };
+            setImage(source.uri); // set image state here
+            console.log(image)
+            
+            
         }
+        console.log(response);  
     });
   };
 
@@ -37,12 +41,26 @@ const NewPost = ({ navigation }) => {
     // navigation.goBack();
   };
 
+
+
+  useEffect(() => {
+    console.log(image);
+  }, [image]);
+
+
+
+
+
+
+
+
   return (
     <View style={styles.container}>
-      {/* <Button title="Select Image" onPress={selectImage} /> */}
-      <Button title="Select Image" onPress={selectImage} />
-      {image && <Image source={image} style={{ width: 200, height: 200 }} />}
-      
+        <Text style={styles.title}>Nueva Publicación</Text>
+
+      <Button title="Selecciona una imágen" onPress={selectImage} />
+      {/* {image && <Image source={image} style={{ width: 200, height: 200 }} />} */}
+      {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
       {/* {image && <Image source={{ uri: image }} style={styles.image} />} */}
       <TextInput placeholder="Title" value={title} onChangeText={setTitle} style={styles.input} />
       <TextInput placeholder="Description" value={description} onChangeText={setDescription} style={styles.input} multiline />
