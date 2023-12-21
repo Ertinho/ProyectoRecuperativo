@@ -92,10 +92,73 @@ const Home = ({ navigation }) => {
 
 
 
+    const likePost = async (postId) => {
+      // Implement the logic for liking a post here
+      const credentials = await Keychain.getGenericPassword();
+      if (!credentials) {
+        return;
+      }
+
+      try {
+        const response = await axios.post(`${endpoint}posts/${postId}/like`,  {
+          liked: true,
+          post_id: postId,
+        },  {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+    
+        if (response.status === 200) {
+          // Post was liked successfully
+          // You might want to update your local state here to include the new like
+        }
+      } catch (error) {
+        console.error('Failed to like post:', error);
+      }
+
+    };
+    
+    const viewComments = (postId) => {
+      // Implement the logic for viewing comments here
+    };
+    
+
+
+    const addComment = async (postId, text) => {
+      const credentials = await Keychain.getGenericPassword();
+      if (!credentials) {
+          return;
+      }
+      const accessToken = credentials.username;
+
+      // Implement the logic for adding a comment here
+      try {
+        const response = await axios.post(`${endpoint}posts/${postId}/comments`, {
+          text: text,
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+    
+        if (response.status === 200) {
+          // Comment was added successfully
+          // You might want to update your local state here to include the new comment
+        }
+      } catch (error) {
+        console.error('Failed to add comment:', error);
+      }
+    };
+
+
+
+
+
 
     return (
         <View style={styles.container}>
-            
+
             <FlatList
               data={posts}
               keyExtractor={(item) => item.id.toString()}
@@ -104,7 +167,15 @@ const Home = ({ navigation }) => {
                   <Text style={styles.title}>{item.title}</Text>
                   <Image source={{ uri: item.image }} style={styles.image} />
                   <Text style={styles.description}>{item.description}</Text>
-                  <Text style={styles.author}>Posted by {item.username}</Text>
+                  <Text style={styles.author}>Publicado por {item.username}</Text>
+
+
+                  <View style={styles.interactions}>
+                    <Button title={`Like (${item.likesCount})`} onPress={() => likePost(item.id)} />
+                    <Button title={`Comments (${item.commentsCount})`} onPress={() => viewComments(item.id)} />
+                  </View>
+                  <TextInput placeholder="Leave a comment" onSubmitEditing={({ text }) => addComment(item.id, text)} />
+
                 </View>
               )}
             />
@@ -144,10 +215,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-
-
-
-
+  interactions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
 
 
 });

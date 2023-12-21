@@ -2,21 +2,27 @@
 import React, { useState } from 'react';
 import { Button, Image, TextInput, View, StyleSheet } from 'react-native';
 
-
-
-import ImagePicker from 'react-native-image-picker';
-
+import * as ImagePicker from 'react-native-image-picker';
 
 const NewPost = ({ navigation }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
 
+
   const selectImage = () => {
-    ImagePicker.showImagePicker({}, (response) => {
-      if (response.uri) {
-        setImage(response.uri);
-      }
+    const options = {
+        noData: true,
+    };    
+    ImagePicker.launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+        } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error);
+        } else {
+            const source = { uri: response.uri };
+            setImage(source);
+        }
     });
   };
 
@@ -33,8 +39,11 @@ const NewPost = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* <Button title="Select Image" onPress={selectImage} /> */}
       <Button title="Select Image" onPress={selectImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+      {image && <Image source={image} style={{ width: 200, height: 200 }} />}
+      
+      {/* {image && <Image source={{ uri: image }} style={styles.image} />} */}
       <TextInput placeholder="Title" value={title} onChangeText={setTitle} style={styles.input} />
       <TextInput placeholder="Description" value={description} onChangeText={setDescription} style={styles.input} multiline />
       <Button title="Submit Post" onPress={submitPost} />

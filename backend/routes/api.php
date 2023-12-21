@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
-
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ImageController;
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +42,12 @@ Route::group(['middleware' => ['jwt.auth']], function() {
 
     //update
     Route::put('profile', [UserController::class, 'updateProfile']);
+    //make a comment
+    Route::post('posts/{postId}/comments', [CommentController::class, 'store']);
+    //like a post
+    Route::post('posts/{postId}/like', [PostController::class, 'updateLikes']);
+    //show the likes of a post
+    Route::get('posts/{postId}/like', [PostController::class, 'showLikes']);
 });
 
 

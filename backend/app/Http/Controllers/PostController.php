@@ -28,8 +28,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         try {
-            $token = str_replace('Bearer ', '', $request->header('Authorization'));
-            $user = JWTAuth::toUser($token);
+            $user = JWTAuth::user();
         } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response()->json(['error' => 'El token no es válido'], 400);
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
@@ -76,41 +75,103 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updateLikes(UpdatePostRequest $request, int $id)
+    public function updateLikes(Request $request, int $postId)
     {
-        //
+        try {
+            $user = JWTAuth::user();
+        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => 'El token no es válido'], 400);
+        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['error' => 'El token ha caducado'], 400);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Algo salió mal'], 500);
+        }
 
-        try{
-            DB::beginTransaction();
-            $post = Post::find($id);
-             if(!$post){
+        if (!$user) {
+            return response()->json(['error' => 'No autenticado'], 401);
+        }
+
+        // buscamos el post
+        $post = Post::findOrFail($postId);
+        if(!$post){
+            return response()->json([
+            'message' => 'No se encontró el post',
+            ], 404);
+        }
+
+        // vemos si el usuario ya le dio like a este post
+        $liked = $post->likes()->where('user_id', $user->id)->first();
+        if ($liked) {
+            //vemos si el liked es true
+            if($liked->liked == true){
+                // Actualizamos el post con un like menos
+                //obtenemos el numero de likes
+                $likes = $post->likesCount - 1;
+                $post->update([
+                    'likesCount' => $likes,
+                ]);
+
+                // actualizamos el like con liked = false
+                $liked->update([
+                    'liked' => false,
+                ]);
+
+                // Retornamos la respuesta
                 return response()->json([
-                'message' => 'No se encontró el post',
-                ], 404);
-                 }
-            $updateLikes = $post->likesCount + 1;
+                    'message' => 'Se actualizó el post',
+                    'post' => $post,
+                ], 200);
+            }else{
+                // Actualizamos el post con un like más
+                //obtenemos el numero de likes
+                $likesCount = $post->likesCount + 1;
+                $post->update([
+                    'likesCount' => $likesCount,
+                ]);
+
+                // actualizamos el like con liked = true
+                $liked->update([
+                    'liked' => true,
+                ]);
+
+                // Retornamos la respuesta
+                return response()->json([
+                    'message' => 'Se actualizó el post',
+                    'post' => $post,
+                ], 200);
+            }
+        }else{
+            // Actualizamos el post con un like más
+            //obtenemos el numero de likes
+            $likesCount = $post->likesCount + 1;
             $post->update([
-                'likesCount' => $updateLikes,
+                'likesCount' => $likesCount,
             ]);
-            DB::commit();
+
+            // Creamos el like
+            $post->likes()->create([
+                'user_id' => $user->id,
+                'liked' => true,
+                'post_id' => $post->id,
+            ]);
+
+            // Retornamos la respuesta
             return response()->json([
                 'message' => 'Se actualizó el post',
                 'post' => $post,
             ], 200);
         }
-        catch (JWTException $e) {
-            // Retornamos la respuesta
-            return response()->json([
-                'message' => 'Oops ha ocurido un error...',
-            ], 500);
-        }
 
     }
 
+    public function showLikes($id)
+    {
+        $post = Post::withCount('likes')->find($id);
 
-
-
-
-
+        return response()->json([
+            'post' => $post,
+            'likesCount' => $post->likesCount,
+        ]);
+    }
 
 }
