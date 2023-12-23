@@ -1,5 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { 
+  View, 
+  TextInput, 
+  Button, 
+  Alert, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import * as Keychain from 'react-native-keychain';

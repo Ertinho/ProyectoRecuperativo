@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Button,  Modal, Alert , ScrollView, StyleSheet} from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Button, 
+  Modal, 
+  Alert, 
+  ScrollView, 
+  StyleSheet
+} from 'react-native';
 
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';

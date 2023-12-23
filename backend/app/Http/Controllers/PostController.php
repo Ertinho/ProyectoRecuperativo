@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -68,21 +69,29 @@ class PostController extends Controller
         $request->validate([
             'title' => ['required', 'max:255'],
             'description' => ['required'],
-            'pathPhoto' => ['required'],
+            'image' => ['required' , 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ], [
-            'title.required' => 'El título es requerido',
-            'description.required' => 'La descripción es requerida',
-            'pathPhoto.required' => 'La foto es requerida',
+            'title.required' => 'El título es requerido.',
+            'description.required' => 'La descripción es requerida.',
+            'image.required' => 'La imágen es requerida.',
+
         ]);
 
-
         try {
+
+
+            $file = $request->file('image');
+            $name =  uniqid() . "_" . $file->getClientOriginalName();
+
+            $path = Storage::putFileAs('public/images', $file, $name);
+
+
             // Creamos el post
             $post = Post::create([
                 'title' => $request->title,
                 'description' => $request->description,
                 'user_id' => $user->id,
-                'pathPhoto' => $request->pathPhoto,
+                'pathPhoto' => $path,
                 'likesCount' => 0,
                 'commentsCount' => 0,
             ]);
@@ -95,7 +104,7 @@ class PostController extends Controller
         }
         // Retornamos la respuesta
         return response()->json([
-            'message' => 'Post creado exitosamente',
+            'message' => 'Publicación creada exitosamente.',
         ], 200);
     }
 
