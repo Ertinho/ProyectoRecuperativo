@@ -19,8 +19,10 @@ export async function isTokenExpiring() {
     // If the token is expiring in the next 10 minutes, return true
     // Otherwise, return false.
     if (tokenExpiration - currentTime <= 600) {
+      console.log('Token is expiring soon. Refresh it!');
       return true;
     } else {
+      console.log('Token is still valid.');
       return false;
     }
 }
@@ -52,6 +54,28 @@ export async function refreshTokenFunc() {
       }
     } catch (error) {
       // Handle the error here
+      // If the error is due to an invalid token, we log the user out.
+      if (error.response.status === 400) {
+        // Show an alert to the user
+        Alert.alert('Error', 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
+
+        await logout();
+      }
+
+      // if the error is due to server being down, show the error message
+      if (error.response.status === 500) {
+        //console.error(error.response.data.message);
+        // if the error has a message and error, show it
+        if (error.response.data.error && error.response.data.message) {
+          console.error(error.response.data.error);
+          console.error(error.response.data.message);
+        }else{
+          console.error(error.response.data);
+        }
+
+      }
+
+      // show an error message
       console.error(error);
     }
 }

@@ -184,6 +184,14 @@ class UserController extends Controller
         } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
             // Handle error while trying to encode the token
             return response()->json(['error' => 'Error while encoding the token'], 500);
+        } catch (\Exception $e) {
+            // Handle any other errors
+            return response()->json(['error' => 'Something went wrong'], 500);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al refrescar el token.',
+                'error' => $th->getMessage(),
+            ], 500);
         }
     }
 

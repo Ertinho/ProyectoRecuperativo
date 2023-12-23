@@ -13,17 +13,21 @@ const endpoint = URL;
 
 
 const Profile = ({ navigation }) => {
-  const {  logout  } = useContext(AuthContext); // Access the isAuthenticated value
+  const {  logout , checkCredentials } = useContext(AuthContext); 
   
   const [user, setUser] = useState({});
 
   useFocusEffect(
     React.useCallback(() => {
       const fetchUserData = async () => {
-        const credentials = await Keychain.getGenericPassword();
-        if (!credentials) {
+        // Check credentials before making the request to the backend
+        const credentialsAreValid = await checkCredentials();
+        if (!credentialsAreValid) {
           return;
         }
+
+        // Get the credentials from the keychain
+        const credentials = await Keychain.getGenericPassword();
         const accessToken = credentials.username;
 
         try {

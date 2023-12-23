@@ -18,6 +18,29 @@ class PostController extends Controller
             $query->where('status', 'active');
         })->orderBy('created_at', 'desc')->get();
 
+        // Add the user's username to each post.
+        foreach ($posts as $post) {
+            $post->userName = $post->user->userName;
+        }
+
+        // Add the post's likes and their data to each post.
+        foreach ($posts as $post) {
+            $post->likes = $post->likes()->get();
+        }
+
+        // Add the post's comments and their data to each post.
+        foreach ($posts as $post) {
+            $post->comments = $post->comments()->get();
+        }
+
+        // Add the post's Image to each post.
+        foreach ($posts as $post) {
+            $post->image = $post->image()->get();
+        }
+
+
+
+
         return response()->json($posts, 200);
     }
 
@@ -52,22 +75,28 @@ class PostController extends Controller
             'pathPhoto.required' => 'La foto es requerida',
         ]);
 
-        // Creamos el post
-        $post = Post::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'user_id' => $user->id,
-            'pathPhoto' => $request->pathPhoto,
-            'likesCount' => 0,
-            'commentsCount' => 0,
-        ]);
 
-
+        try {
+            // Creamos el post
+            $post = Post::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'user_id' => $user->id,
+                'pathPhoto' => $request->pathPhoto,
+                'likesCount' => 0,
+                'commentsCount' => 0,
+            ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json([
+                'message' => 'Algo salió mal',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
         // Retornamos la respuesta
         return response()->json([
             'message' => 'Post creado exitosamente',
-            'post' => $post
-        ], 201);
+        ], 200);
     }
 
 

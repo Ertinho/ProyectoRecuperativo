@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button,  Modal, Alert , ScrollView, StyleSheet} from 'react-native';
 
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-
+import { AuthContext } from '../context/AuthContext'; 
 import * as Keychain from 'react-native-keychain';
 
 
@@ -14,9 +14,12 @@ const endpoint = URL;
 
 
 const EditProfile = ({ navigation }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [errors, setErrors] = useState([]);
+  const { checkCredentials } = useContext(AuthContext); // Access the checkCredentials function from the AuthContext
+
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errors, setErrors] = useState([]);
 
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -55,120 +58,128 @@ const EditProfile = ({ navigation }) => {
     }
   };
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const credentials = await Keychain.getGenericPassword();
-            if (!credentials) {
-                return;
-            }
-            const accessToken = credentials.username;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      // Check credentials before making the request to the backend
+      const credentialsAreValid = await checkCredentials();
+      if (!credentialsAreValid) {
+        return;
+      }
 
-            try {
-                const response = await axios.get(`${endpoint}profile`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                });
-                const user = response.data;
+      // Get the credentials from the keychain
+      const credentials = await Keychain.getGenericPassword();
+      const accessToken = credentials.username;
+      
+      try {
+        const response = await axios.get(`${endpoint}profile`, {
+          headers: {
+              Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const user = response.data;
 
-                setName(user.name);
-                setLastName(user.lastName);
-                setBirthDate(user.birthDate);
-                setSelectedLanguages(user.programming_languages.map(lang => lang.name));
-                setSelectedTransversalSkills(user.transversal_skills.map(skill => skill.name));
-                setSelectedGeneralSkills(user.skills.map(skill => skill.name));
+        setName(user.name);
+        setLastName(user.lastName);
+        setBirthDate(user.birthDate);
+        setSelectedLanguages(user.programming_languages.map(lang => lang.name));
+        setSelectedTransversalSkills(user.transversal_skills.map(skill => skill.name));
+        setSelectedGeneralSkills(user.skills.map(skill => skill.name));
 
-                setIsLoading(false); // Set loading to false after data is fetched
-            } catch (error) {
-                    console.error('Failed to fetch user data:', error);
-            }
-        };
+        setIsLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
 
-        fetchUserData();
-    }, []);
-
-
+    fetchUserData();
+  }, []);
 
 
 
-    // Function to handle the update of the profile
-    const handleUpdate = async () => {
-        const credentials = await Keychain.getGenericPassword();
-        if (!credentials) {
-            return;
+
+
+  // Function to handle the update of the profile
+  const handleUpdate = async () => {  
+    // Check credentials before making the request to the backend
+    const credentialsAreValid = await checkCredentials();
+    if (!credentialsAreValid) {
+      return;
+    }
+
+    // Get the credentials from the keychain
+    const credentials = await Keychain.getGenericPassword();
+    const accessToken = credentials.username;
+
+    try {
+      const response = await axios.put(`${endpoint}profile`,  {
+        name: name,
+        lastName: lastName,
+        birthDate: birthdate,
+        programming_languages: selectedLanguages,
+        transversal_skills: selectedTransversalSkills,
+        skills: selectedGeneralSkills,
+      }, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
         }
-        const accessToken = credentials.username;
-
-        try {
-            const response = await axios.put(`${endpoint}profile`,  {
-                name: name,
-                lastName: lastName,
-                birthDate: birthdate,
-                programming_languages: selectedLanguages,
-                transversal_skills: selectedTransversalSkills,
-                skills: selectedGeneralSkills,
-            }, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
-            if (response.status === 200)
-            {
-                //obtain the response message from the backend
-                let successMessage = response.data.message;
-                Alert.alert( successMessage);
-                navigation.navigate('Perfil');
-            }
-        } catch (error) {
-            // ... error handling code remains the same ...
-            let errorMessages = [];
-            // If the error response has data and errors, use it
-            if (error.response && error.response.data && error.response.data.errors) {
-                errorMessages = Object.values(error.response.data.errors);
-            }
-            
-            // If the error has a status code of 500, it means there's a server error
-            // If there's a server error, show a different alert
-            if (error.response && error.response.status === 500) {
-                // The error response from the backend includes a message and error
-                let errorMessage1 = error.response.data.message;
-                let errorMessage2 = error.response.data.error;
-                // If the error response has a message and error, use it
-                if (error.response.data.message && error.response.data.error) {
-                errorMessages = [errorMessage1, errorMessage2];
-                }
-            }
-
-            setErrors(errorMessages);
-            setModalVisible(true);
+      });
+      if (response.status === 200)
+      {
+        //obtain the response message from the backend
+        let successMessage = response.data.message;
+        Alert.alert( successMessage);
+        navigation.navigate('Perfil');
+      }
+    } catch (error) {
+      // ... error handling code remains the same ...
+      let errorMessages = [];
+      // If the error response has data and errors, use it
+      if (error.response && error.response.data && error.response.data.errors) {
+        errorMessages = Object.values(error.response.data.errors);
+      }
+      
+      // If the error has a status code of 500, it means there's a server error
+      // If there's a server error, show a different alert
+      if (error.response && error.response.status === 500) {
+        // The error response from the backend includes a message and error
+        let errorMessage1 = error.response.data.message;
+        let errorMessage2 = error.response.data.error;
+        // If the error response has a message and error, use it
+        if (error.response.data.message && error.response.data.error) {
+          errorMessages = [errorMessage1, errorMessage2];
         }
-    };
+      }
+
+      setErrors(errorMessages);
+      setModalVisible(true);
+    }
+  };
 
 
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
-    const formatDate = (date) => {
-        let month = '' + (date.getMonth() + 1);
-        let day = '' + date.getDate();
-        let year = date.getFullYear();
-    
-        if (month.length < 2) 
-        month = '0' + month;
-        if (day.length < 2) 
-        day = '0' + day;
-    
-        return [year, month, day].join('-');
-    };
-    const handleConfirm = (date) => {
-        setBirthDate(formatDate(date));
-        hideDatePicker();
-    };
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+  const formatDate = (date) => {
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = date.getFullYear();
+
+    if (month.length < 2) 
+    month = '0' + month;
+    if (day.length < 2) 
+    day = '0' + day;
+
+    return [year, month, day].join('-');
+  };
+  const handleConfirm = (date) => {
+    setBirthDate(formatDate(date));
+    hideDatePicker();
+  };
 
 
     return (

@@ -14,12 +14,22 @@ const endpoint = URL;
 
 
 const Home = ({ navigation }) => {
-    const { isAuthenticated , logout} = useContext(AuthContext); // Access the isAuthenticated value
+    const { isAuthenticated , logout , checkCredentials} = useContext(AuthContext); // Access the isAuthenticated value
     
     useEffect(() => {
       // If the user is not authenticated, navigate to the Login screen
       if (!isAuthenticated) {
-        navigation.navigate('Iniciar Sesión');
+
+        // If the user is not authenticated, show an alert
+        Alert.alert('No autorizado', 'Inicia sesión para ver esta pantalla.', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Iniciar Sesión'),
+          },
+        ]);
+
+        // If the user is not authenticated, navigate to the Login screen
+        //navigation.navigate('Iniciar Sesión');
       }
 
       // Add listener for beforeRemove event
@@ -49,10 +59,14 @@ const Home = ({ navigation }) => {
     useFocusEffect(
       React.useCallback(() => {
         const fetchPosts = async () => {
-          const credentials = await Keychain.getGenericPassword();
-          if (!credentials) {
-              return;
+          // Check credentials before making the request to the backend
+          const credentialsAreValid = await checkCredentials();
+          if (!credentialsAreValid) {
+            return;
           }
+
+          // Get the credentials from the keychain
+          const credentials = await Keychain.getGenericPassword();
           const accessToken = credentials.username;
 
           try {
@@ -93,15 +107,18 @@ const Home = ({ navigation }) => {
 
 
     const likePost = async (postId) => {
-      // Implement the logic for liking a post here
-      const credentials = await Keychain.getGenericPassword();
-      if (!credentials) {
+      // Check credentials before making the request to the backend
+      const credentialsAreValid = await checkCredentials();
+      if (!credentialsAreValid) {
         return;
       }
 
+      // Get the credentials from the keychain
+      const credentials = await Keychain.getGenericPassword();
+      const accessToken = credentials.username;
+      
       try {
         const response = await axios.post(`${endpoint}posts/${postId}/like`,  {
-          liked: true,
           post_id: postId,
         },  {
           headers: {
@@ -126,10 +143,14 @@ const Home = ({ navigation }) => {
 
 
     const addComment = async (postId, text) => {
-      const credentials = await Keychain.getGenericPassword();
-      if (!credentials) {
-          return;
+      // Check credentials before making the request to the backend
+      const credentialsAreValid = await checkCredentials();
+      if (!credentialsAreValid) {
+        return;
       }
+
+      // Get the credentials from the keychain
+      const credentials = await Keychain.getGenericPassword();
       const accessToken = credentials.username;
 
       // Implement the logic for adding a comment here
