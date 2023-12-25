@@ -51,6 +51,8 @@ export async function refreshTokenFunc() {
   
         // Store the new token and expiration time in the keychain
         await Keychain.setGenericPassword(access_token, expirationTime);
+
+        console.log('Token refreshed.');
       }
     } catch (error) {
       // Handle the error here

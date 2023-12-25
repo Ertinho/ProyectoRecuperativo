@@ -13,6 +13,7 @@ import {
     Platform
 } from 'react-native';
 
+import ImageResizer from '@bam.tech/react-native-image-resizer';
 import * as ImagePicker from 'react-native-image-picker';
 import * as Keychain from 'react-native-keychain';
 import { AuthContext } from '../context/AuthContext'; 
@@ -87,14 +88,28 @@ const NewPost = ({ navigation }) => {
             postFormData.append('description', description);
 
             if (image ) {
-                
+                ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 90)
+                .then((resizedImageUri) => {
+                    let imageFile = {
+                        uri: resizedImageUri.uri,
+                        type: 'JPEG',
+                        name: resizedImageUri.name,
+                    };
+                    postFormData.append('image', imageFile);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    return Alert.alert('Unable to resize the photo', 'Check the console for full the error message');
+                });
+
+                /*
                 let imageFile = {
                     
                     uri: image.uri,
                     type: fileType,
                     name: fileName,
                 };
-                postFormData.append('image', imageFile);
+                postFormData.append('image', imageFile);*/
                 //postFormData.append('image', image);
             } else {
                 Alert.alert('Error', 'No se seleccionó ninguna imágen.');
