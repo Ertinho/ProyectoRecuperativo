@@ -68,6 +68,22 @@ const NewPost = ({ navigation }) => {
     };
 
 
+    const resizeImage = async (image) => {
+        try {
+            const resizedImageUri = await ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 90);
+            return {
+                uri: resizedImageUri.uri,
+                type: 'image/jpeg',
+                name: fileName,
+            };
+        } catch (err) {
+            console.log(err);
+            Alert.alert('Unable to resize the photo', 'Check the console for full the error message');
+            throw err; // Re-throw the error so it can be caught in submitPost
+        }
+    };
+
+
 
   
     const submitPost = async () => {
@@ -88,20 +104,8 @@ const NewPost = ({ navigation }) => {
             postFormData.append('description', description);
 
             if (image ) {
-                ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 90)
-                .then((resizedImageUri) => {
-                    let imageFile = {
-                        uri: resizedImageUri.uri,
-                        type: 'JPEG',
-                        name: resizedImageUri.name,
-                    };
-                    postFormData.append('image', imageFile);
-                })
-                .catch((err) => {
-                    console.log(err);
-                    return Alert.alert('Unable to resize the photo', 'Check the console for full the error message');
-                });
-
+                
+                const imageFile = await resizeImage(image);
                 /*
                 let imageFile = {
                     
@@ -111,11 +115,13 @@ const NewPost = ({ navigation }) => {
                 };
                 postFormData.append('image', imageFile);*/
                 //postFormData.append('image', image);
+                postFormData.append('image', imageFile);
             } else {
                 Alert.alert('Error', 'No se seleccionó ninguna imágen.');
                 return;
             }
 
+            
             const postResponse = await axios.post(`${endpoint}createPost`, postFormData , {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -129,7 +135,7 @@ const NewPost = ({ navigation }) => {
                 Alert.alert(successMessage);
                 navigation.navigate('Home');
             }
-
+            
 
         } catch (error) {
             console.log(error); // Add this line
